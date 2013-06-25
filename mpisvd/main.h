@@ -1,6 +1,7 @@
 #ifndef MPISVD_H
 #define MPISVD_H
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 typedef struct _rc4_t {
     unsigned char* state;
@@ -32,10 +33,14 @@ compressed_matrix_t *load_matrix(int rank, int size, int rows, int cols);
 int unpacked_column_size(unsigned int* column);
 int packed_matrix_size(unsigned int** matrix, int cols);
 
+void save_factor(double* factor, size_t rows, size_t dims, const char* filename);
+void save_factors(factors_t *factors);
+
 factors_t* prepare_factors(char* seed, int dimensions, int rows, int cols);
 void free_factors(factors_t *factors);
 inline void update_value(factors_t*& factors, size_t& row, size_t& col, double& value, double& gamma, double& err);
 void update_factors(compressed_matrix_t *matrix, factors_t *factors, int phase, int size, double gamma, double& err, size_t& total);
+void sync_results(factors_t *factors, int rank, int phase, int size);
 
 rc4_t* init_random(char* seed);
 void free_random(rc4_t *random);

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <sys/time.h>
 
 #include <mpich2/mpi.h>
 
@@ -15,7 +16,10 @@ using namespace std;
 
 #define DEFAULT_COLUMNS 17700
 #define DEFAULT_ROWS 500000
-#define DEFAULT_DIMS 10
+#define DEFAULT_DIMS 20
+#define DEFAULT_PASSES 5
+#define DEFAULT_GAMMA 0.01
+#define DEFAULT_ANNEALING 0.98
 
 int main(int argc, char *argv[])
 {
@@ -35,23 +39,41 @@ int main(int argc, char *argv[])
 
     cout << "This is instance " << mpi_rank << " of " << mpi_size << endl;
     cout << "Initializing factor model..." << endl;
-    factors_t *factors = prepare_factors("seed123", DEFAULT_DIMS, DEFAULT_ROWS, DEFAULT_COLUMNS);
+    factors_t *factors = prepare_factors("seed!Y*/", DEFAULT_DIMS, DEFAULT_ROWS, DEFAULT_COLUMNS);
 
     double error;
     size_t total;
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < DEFAULT_PASSES * mpi_size; ++i) {
         error = 0.0;
         total = 0;
 
-        cout << mpi_rank << ": factorizing Block " << (i + mpi_rank) % mpi_size << endl;
+        cout << mpi_rank
+             << ": factorizing Block "
+             << (i + mpi_rank) % mpi_size
+             << ", "
+             << mpi_rank
+             << endl;
 
         update_factors(input, factors,
                        (i + mpi_rank) % mpi_size, /* partition index offset by mpi_rank -> diagonal */
                        mpi_size,                  /* number of partitions */
-                       0.01 * pow(0.99, i), error, total);
+                       DEFAULT_GAMMA * pow(DEFAULT_ANNEALING, i),
+                       error, total);
 
-        cout << mpi_rank << ": Local RSME = " << sqrt(error / (double)total) << endl;
+        if (mpi_size > 1) {
+            // sendbuf == recvbuf causes MPI to crash!
+            sync_results(factors, mpi_rank, (i + mpi_rank) % mpi_size, mpi_size);
+        }
+
+        cout << mpi_rank
+             << ": Local RSME = " << sqrt(error / (double)total) << endl;
+    }
+
+    cout << "Saving results to ifactors.csv and ufactors.csv\n";
+
+    if (mpi_rank == 0) {
+        save_factors(factors);
     }
 
     cout << "Ok.\n";
@@ -165,7 +187,26 @@ compressed_matrix_t *load_matrix(int rank, int size, int rows, int cols) {
     return result;
 }
 
+void save_factor(double* factor, size_t rows, size_t dims, const char* filename) {
+    ofstream out(filename, ios_base::out);
 
+    for (size_t row = 0; row < rows; ++row) {
+        for (size_t i = 0; i < dims; ++i) {
+            out << factor[row * dims + i] << ", ";
+        }
+        out << endl;
+    }
+
+    out.flush();
+    out.close();
+}
+
+void save_factors(factors_t *factors) {
+
+    save_factor(factors->ifactors, factors->cols, factors->dims, "ifactors.csv");
+    save_factor(factors->ufactors, factors->rows, factors->dims, "ufactors.csv");
+
+}
 
 // ----------------------------------------------------------------------------
 // ARCFOUR PRNG with normal distribution support
@@ -276,6 +317,7 @@ void free_factors(factors_t *factors) {
     free(factors);
 }
 
+// A single Stochastic Gradient Descend step
 inline void update_value(factors_t*& factors, size_t& row, size_t& col, double& value, double& gamma, double& err) {
     double *u_row = &(factors->ufactors[row * factors->dims]);
     double *i_col = &(factors->ifactors[col * factors->dims]);
@@ -289,10 +331,18 @@ inline void update_value(factors_t*& factors, size_t& row, size_t& col, double& 
     // prediction error
     double error = value - dot_product;
 
+    // divergence guard
+    if (ABS(error) > 10.0) {
+        //cout << "WARNING: Divergence at " << row << ", " << col << " by " << error << endl;
+        error = error > 0.0 ? 10.0 : -10.0;
+    }
+
     // gradient descend
     for (size_t i = 0; i < factors->dims; ++i) {
-        i_col[i] += gamma * u_row[i] * error;
-        u_row[i] += gamma * i_col[i] * error;
+        double delta_i = gamma * u_row[i] * error;
+        double delta_u = gamma * i_col[i] * error;
+        i_col[i] += delta_i;
+        u_row[i] += delta_u;
     }
 
     // aggregate debug info (for mean squared error)
@@ -303,7 +353,7 @@ inline void update_value(factors_t*& factors, size_t& row, size_t& col, double& 
 // too bad this is O(n)
 void start_positions(compressed_matrix_t *matrix, int phase, int size, size_t *indices) {
     size_t start = phase * (matrix->rows / size);
-    for (int col = 0; col < matrix->cols; ++col) {
+    for (size_t col = 0; col < matrix->cols; ++col) {
         size_t i = 0;
         size_t row = 0;
         unsigned int* column = matrix->columns[col];
@@ -365,3 +415,26 @@ void update_factors(compressed_matrix_t *matrix, factors_t *factors, int phase, 
     total += elements;
 }
 
+// synchronize on recently updated factors
+// -> updated section to neighbour with lower rank - it will proceed there
+// -> receive update from higher rank neighbour and use in next step
+void sync_results(factors_t *factors, int rank, int phase, int size) {
+    int nextphase = (phase + 1) % size;
+    size_t blocksize = (factors->rows / size);
+
+    size_t recent_start = blocksize * phase;
+    size_t recent_count = blocksize + ((phase == size - 1) ? (factors->rows % size) : 0);
+    size_t next_start = blocksize * nextphase;
+    size_t next_count = blocksize + ((nextphase == size - 1) ? (factors->rows % size) : 0);
+
+    double *recent = &factors->ufactors[recent_start * factors->dims];
+    double *next = &factors->ufactors[next_start * factors->dims];
+
+    MPI_Status status;
+
+    MPI_Sendrecv(
+                (void*)recent,recent_count, MPI_DOUBLE, (rank + size - 1) % size, 0,
+                (void*)next, next_count, MPI_DOUBLE, (rank + 1) % size, 0,
+                MPI_COMM_WORLD, &status);
+    //cout << "MPI_Sendrecv: "  << status.count << endl;
+}
