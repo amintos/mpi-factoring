@@ -21,6 +21,8 @@ using namespace std;
 #define DEFAULT_GAMMA 0.01
 #define DEFAULT_ANNEALING 0.98
 
+#define DEFAULT_EXPECTED_ELEMENTS 1 //1000000000
+
 int main(int argc, char *argv[])
 {
     int mpi_rank, mpi_size;
@@ -376,43 +378,59 @@ void update_factors(compressed_matrix_t *matrix, factors_t *factors, int phase, 
     size_t *prog = (size_t*)malloc(sizeof(size_t) * matrix->cols);
     size_t maxrow = start + count;
     size_t elements = 0;
+    size_t min_elements = DEFAULT_EXPECTED_ELEMENTS / (size * size);
+    int iterations = 0;
     double error = 0.0;
 
     // search RLE column for initial index this block is concerned with
     start_positions(matrix, phase, size, prog);
 
     // traverse columns
-    for (size_t col = 0; col < matrix->cols; ++col) {
+    while (elements < min_elements) {
 
-        size_t row = 0;                 // decompressed absolute index
-        size_t row_index = prog[col];   // RLE-index in compressed column
-        unsigned int *column = matrix->columns[col];
+        if (iterations > 0) {
+            cout << "Probably time left, starting over." << endl;
+        }
 
-        // traverse rows (stay inside block!)
-        while (row < maxrow) {
-            // extract number of zeroes and following value from entry
+        for (size_t col = 0; col < matrix->cols; ++col) {
 
-            if (column[row_index] == 0) {
-                // we're done here
+            size_t row = 0;                 // decompressed absolute index
+            size_t row_index = prog[col];   // RLE-index in compressed column
+            unsigned int *column = matrix->columns[col];
+
+            // traverse rows (stay inside block!)
+            while (row < maxrow) {
+                // extract number of zeroes and following value from entry
+
+                if (column[row_index] == 0) {
+                    // we're done here
+                    break;
+                }
+
+                size_t zeroes = column[row_index] >> 8;
+                double value = (double)(column[row_index] & 0xff);
+
+                update_value(factors, row, col, value, gamma, error);
+
+                row_index++;
+                elements++;
+                row += zeroes + 1; // + 1: the non-zero entry itself
+            }
+
+            // "procastination protocol"
+            if ((iterations > 0) && (elements >= min_elements)) {
                 break;
             }
 
-            size_t zeroes = column[row_index] >> 8;
-            double value = (double)(column[row_index] & 0xff);
-
-            update_value(factors, row, col, value, gamma, error);
-
-            row_index++;
-            elements++;
-            row += zeroes + 1; // + 1: the non-zero entry itself
         }
 
-        prog[col] = row_index;          // store for next block
-    }
+        // "procastination protocol"
+        iterations++;
 
-    // mean squared error
-    err += error;
-    total += elements;
+        // mean squared error
+        err += error;
+        total += elements;
+   }
 }
 
 // synchronize on recently updated factors
