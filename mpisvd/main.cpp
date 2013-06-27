@@ -6,6 +6,8 @@
 #include <fstream>
 #include <math.h>
 #include <sys/time.h>
+#include <fenv.h>
+#include <signal.h>
 
 #include <mpich2/mpi.h>
 
@@ -14,18 +16,22 @@
 
 using namespace std;
 
-#define DEFAULT_COLUMNS 17700
+#define DEFAULT_COLUMNS 17700 //1000
 #define DEFAULT_ROWS 500000
-#define DEFAULT_DIMS 20
-#define DEFAULT_PASSES 5
+#define DEFAULT_DIMS 10
+#define DEFAULT_PASSES 8
 #define DEFAULT_GAMMA 0.01
 #define DEFAULT_ANNEALING 0.98
 
-#define DEFAULT_EXPECTED_ELEMENTS 1 //1000000000
+//#define BUSY_WAITING
+
+//#define DEFAULT_EXPECTED_ELEMENTS 1 500000000
 
 int main(int argc, char *argv[])
 {
     int mpi_rank, mpi_size;
+
+    //feenableexcept(-1);  // Useful for MPI debugging
 
     MPI_Init(&argc, &argv);
 
@@ -68,13 +74,23 @@ int main(int argc, char *argv[])
             sync_results(factors, mpi_rank, (i + mpi_rank) % mpi_size, mpi_size);
         }
 
-        cout << mpi_rank
-             << ": Local RSME = " << sqrt(error / (double)total) << endl;
+        // output RSME currently computed or -1 if undefined
+        if (total > 0) {
+            cout << mpi_rank
+                 << ": Local Expected Error = "
+                 << error / (double)total
+                 << endl;
+        } else {
+            cout << mpi_rank
+                 << ": Nothing processed"
+                 << endl;
+        }
     }
 
-    cout << "Saving results to ifactors.csv and ufactors.csv\n";
+
 
     if (mpi_rank == 0) {
+        cout << "Saving results to ifactors.csv and ufactors.csv\n";
         save_factors(factors);
     }
 
@@ -338,17 +354,32 @@ inline void update_value(factors_t*& factors, size_t& row, size_t& col, double& 
         //cout << "WARNING: Divergence at " << row << ", " << col << " by " << error << endl;
         error = error > 0.0 ? 10.0 : -10.0;
     }
+//    else if (isnan(error)) {
+//        // roll forward
+//        return;
+//    }
 
     // gradient descend
     for (size_t i = 0; i < factors->dims; ++i) {
         double delta_i = gamma * u_row[i] * error;
         double delta_u = gamma * i_col[i] * error;
-        i_col[i] += delta_i;
-        u_row[i] += delta_u;
+        double i_col_i = i_col[i] + delta_i;
+        double u_row_i = u_row[i] + delta_u;
+
+//        if (!isnan(i_col_i) && !isinf(i_col_i)) {
+//            i_col[i] = i_col_i;
+//        };
+
+//        if (!isnan(u_row_i) && !isinf(u_row_i)) {
+//            u_row[i] = u_row_i;
+//        };
+
+        i_col[i] = i_col_i;
+        u_row[i] = u_row_i;
     }
 
-    // aggregate debug info (for mean squared error)
-    err += error * error;
+    // aggregate debug info (for mean error)
+    err += ABS(error);
 }
 
 // Search for starting positions in each column
@@ -378,20 +409,23 @@ void update_factors(compressed_matrix_t *matrix, factors_t *factors, int phase, 
     size_t *prog = (size_t*)malloc(sizeof(size_t) * matrix->cols);
     size_t maxrow = start + count;
     size_t elements = 0;
+
+#ifdef DEFAULT_EXPECTED_ELEMENTS
     size_t min_elements = DEFAULT_EXPECTED_ELEMENTS / (size * size);
+#else
+    size_t min_elements = 1;
+#endif
     int iterations = 0;
     double error = 0.0;
 
     // search RLE column for initial index this block is concerned with
     start_positions(matrix, phase, size, prog);
 
-    // traverse columns
+#ifdef BUSY_WAITING
+    // procrastination protocol
     while (elements < min_elements) {
-
-        if (iterations > 0) {
-            cout << "Probably time left, starting over." << endl;
-        }
-
+#endif
+        // traverse columns
         for (size_t col = 0; col < matrix->cols; ++col) {
 
             size_t row = 0;                 // decompressed absolute index
@@ -415,22 +449,25 @@ void update_factors(compressed_matrix_t *matrix, factors_t *factors, int phase, 
                 row_index++;
                 elements++;
                 row += zeroes + 1; // + 1: the non-zero entry itself
-            }
-
-            // "procastination protocol"
+               }
+#ifdef BUSY_WAITING
+            // exit procastination protocol
             if ((iterations > 0) && (elements >= min_elements)) {
                 break;
             }
+#endif
 
         }
-
-        // "procastination protocol"
+#ifdef BUSY_WAITING
+        // procastination protocol
         iterations++;
-
+#endif
         // mean squared error
         err += error;
         total += elements;
+ #ifdef BUSY_WAITING
    }
+ #endif
 }
 
 // synchronize on recently updated factors
