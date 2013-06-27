@@ -1,0 +1,17 @@
+#!/bin/bash
+
+export PATH=/home/bot/tau-2.22.2/x86_64/bin:$PATH
+export PATH=/home/bot/pdtoolkit-3.19/x86_64/bin:$PATH
+
+# configure TAU
+# 1. Makefile template: use TAU with MPI and PDT (Instrumentation)
+export TAU_MAKEFILE=/home/bot/tau-2.22.2/x86_64/lib/Makefile.tau-mpi-pdt
+
+# 2. Options
+
+export TAU_OPTIONS='-optVerbose -optPDTInst -optKeepFiles' # or more...
+export TAU_COMM_MATRIX=1
+#export TAU_TRACE=1
+export TAU_PROFILE=1
+export TAU_CALLPATH=1
+export TAU_CALLPATH_DEPTH=100

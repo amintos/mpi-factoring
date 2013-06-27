@@ -1,0 +1,8 @@
+rm tau*
+rm profile*
+rm trace*
+rm *.o
+rm svd
+rm a.out
+rm *.csv
+rm event*
