@@ -1,0 +1,68 @@
+67 dynamic_trace_events
+# FunctionId Group Tag "Name Type" Parameters
+0 TAUEVENT 0 ".TAU <unknown event>" TriggerValue
+1 TAU_DEFAULT 0 "_GLOBAL__sub_I_main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {495,0}] " EntryExit
+2 TAU_USER 0 ".TAU application " EntryExit
+3 TAU_CALLPATH 0 ".TAU application => _GLOBAL__sub_I_main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {495,0}] " EntryExit
+4 TAU_DEFAULT 0 "__static_initialization_and_destruction_0 [{/home/bot/mpi-factoring/mpisvd/main.cpp} {495,0}] " EntryExit
+5 TAU_CALLPATH 0 ".TAU application => _GLOBAL__sub_I_main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {495,0}] => __static_initialization_and_destruction_0 [{/home/bot/mpi-factoring/mpisvd/main.cpp} {495,0}] " EntryExit
+6 TAU_DEFAULT 0 "main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] " EntryExit
+7 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] " EntryExit
+8 MPI 0 "MPI_Init()  " EntryExit
+9 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => MPI_Init()   " EntryExit
+11 MPI 0 "MPI_Comm_rank()  " EntryExit
+12 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => MPI_Comm_rank()   " EntryExit
+13 MPI 0 "MPI_Comm_size()  " EntryExit
+14 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => MPI_Comm_size()   " EntryExit
+15 TAU_DEFAULT 0 "load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] " EntryExit
+16 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] " EntryExit
+17 TAU_DEFAULT 0 "load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] " EntryExit
+18 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] => load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] " EntryExit
+19 TAU_DEFAULT 0 "std::operator|(std::_Ios_Openmode, std::_Ios_Openmode) [{/usr/include/c++/4.7/bits/ios_base.h} {122,0}] " EntryExit
+20 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] => load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] => std::operator|(std::_Ios_Openmode, std::_Ios_Openmode) [{/usr/include/c++/4.7/bits/ios_base.h} {122,0}] " EntryExit
+21 TAU_DISABLE 0 "swap_byte_order(unsigned int*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {173,0}] [THROTTLED]" EntryExit
+22 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] => load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] => swap_byte_order(unsigned int*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {173,0}] " EntryExit
+23 TAU_DEFAULT 0 "swap_byte_order(unsigned int*, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {180,0}] " EntryExit
+24 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] => load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] => swap_byte_order(unsigned int*, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {180,0}] " EntryExit
+25 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => load_matrix(int, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {186,0}] => load_column(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {115,0}] => swap_byte_order(unsigned int*, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {180,0}] => swap_byte_order(unsigned int*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {173,0}] " EntryExit
+26 TAU_DEFAULT 0 "packed_matrix_size(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {165,0}] " EntryExit
+27 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => packed_matrix_size(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {165,0}] " EntryExit
+28 TAU_DEFAULT 0 "packed_column_size(unsigned int*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {155,0}] " EntryExit
+29 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => packed_matrix_size(unsigned int**, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {165,0}] => packed_column_size(unsigned int*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {155,0}] " EntryExit
+30 TAU_DEFAULT 0 "prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] " EntryExit
+31 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] " EntryExit
+32 TAU_DEFAULT 0 "init_random(char*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {232,0}] " EntryExit
+33 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] => init_random(char*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {232,0}] " EntryExit
+34 TAU_DISABLE 0 "rand_gaussian(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {287,0}] [THROTTLED]" EntryExit
+35 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] => rand_gaussian(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {287,0}] " EntryExit
+36 TAU_DISABLE 0 "rand_double(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {279,0}] [THROTTLED]" EntryExit
+37 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] => rand_gaussian(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {287,0}] => rand_double(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {279,0}] " EntryExit
+38 TAU_DISABLE 0 "rand_char(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {263,0}] [THROTTLED]" EntryExit
+39 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] => rand_gaussian(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {287,0}] => rand_double(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {279,0}] => rand_char(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {263,0}] " EntryExit
+40 TAU_DEFAULT 0 "free_random(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {258,0}] " EntryExit
+41 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => prepare_factors(char*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {297,0}] => rand_gaussian(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {287,0}] [THROTTLED] => free_random(_rc4_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {258,0}] " EntryExit
+42 TAU_DEFAULT 0 "update_factors(_compressed_matrix_t*, _factors_t*, int, int, double, double&, unsigned long&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {404,0}] " EntryExit
+43 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => update_factors(_compressed_matrix_t*, _factors_t*, int, int, double, double&, unsigned long&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {404,0}] " EntryExit
+44 TAU_DEFAULT 0 "start_positions(_compressed_matrix_t*, int, int, unsigned long*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {387,0}] " EntryExit
+45 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => update_factors(_compressed_matrix_t*, _factors_t*, int, int, double, double&, unsigned long&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {404,0}] => start_positions(_compressed_matrix_t*, int, int, unsigned long*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {387,0}] " EntryExit
+46 TAU_DISABLE 0 "update_value(_factors_t*&, unsigned long&, unsigned long&, double&, double&, double&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {339,0}] [THROTTLED]" EntryExit
+47 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => update_factors(_compressed_matrix_t*, _factors_t*, int, int, double, double&, unsigned long&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {404,0}] => update_value(_factors_t*&, unsigned long&, unsigned long&, double&, double&, double&) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {339,0}] " EntryExit
+48 TAU_DEFAULT 0 "sync_results(_factors_t*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {476,0}] " EntryExit
+49 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => sync_results(_factors_t*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {476,0}] " EntryExit
+50 MPI 0 "MPI_Sendrecv()  " EntryExit
+51 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => sync_results(_factors_t*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {476,0}] => MPI_Sendrecv()   " EntryExit
+56 TAU_DEFAULT 0 "free_factors(_factors_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {331,0}] " EntryExit
+57 TAU_CALLPATH 0 ".TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => free_factors(_factors_t*) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {331,0}] " EntryExit
+10 TAUEVENT 0 "TauTraceClockOffsetStart" TriggerValue
+52 TAUEVENT 0 "Message size sent to all nodes" TriggerValue
+53 TAUEVENT 0 "Message size sent to node 5" TriggerValue
+54 TAUEVENT 0 "Message size sent to node 5 : .TAU application => main [{/home/bot/mpi-factoring/mpisvd/main.cpp} {31,0}] => sync_results(_factors_t*, int, int, int) [{/home/bot/mpi-factoring/mpisvd/main.cpp} {476,0}] => MPI_Sendrecv()  " TriggerValue
+55 TAUEVENT 0 "Message size received from all nodes" TriggerValue
+60000 TRACER 0 "EV_INIT" none
+60001 TRACER 0 "FLUSH" EntryExit
+60003 TRACER 0 "FLUSH_CLOSE" none
+60004 TRACER 0 "FLUSH_INITM" none
+60005 TRACER 0 "WALL_CLOCK" none
+60006 TRACER 0 "CONT_EVENT" none
+60007 TAU_MESSAGE -7 "MESSAGE_SEND" par
+60008 TAU_MESSAGE -8 "MESSAGE_RECV" par
